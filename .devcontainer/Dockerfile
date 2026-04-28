@@ -1,14 +1,14 @@
-FROM ros:humble-perception
+FROM ros:jazzy-perception
 
 # Install all required packages
 RUN apt-get update && apt-get install -y \
-    ros-humble-turtlesim \
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-rviz2 \
-    ros-humble-turtlebot3-gazebo \
-    ros-humble-xacro \
-    ros-humble-joint-state-publisher \
-    ros-humble-joint-state-publisher-gui \
+    ros-jazzy-turtlesim \
+    ros-jazzy-gz-ros2-control \
+    ros-jazzy-rviz2 \
+    ros-jazzy-turtlebot3-gazebo \
+    ros-jazzy-xacro \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-joint-state-publisher-gui \
     xvfb fluxbox novnc websockify x11vnc \
     python3-colcon-common-extensions \
     git curl && \
@@ -29,18 +29,18 @@ sleep 3\n\
 bash' > /usr/local/bin/start-vnc.sh \
 && chmod +x /usr/local/bin/start-vnc.sh
 
-# Create workspace and clone sjtu_drone
+# Create workspace and clone sjtu_drone (jazzy branch)
 RUN mkdir -p /root/drone_ws/src
 WORKDIR /root/drone_ws/src
-RUN git clone https://github.com/NovoG93/sjtu_drone.git
+RUN git clone -b jazzy https://github.com/NovoG93/sjtu_drone.git
 
 # Build the workspace
 WORKDIR /root/drone_ws
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install"
+RUN /bin/bash -c "source /opt/ros/jazzy/setup.bash && colcon build --symlink-install"
 
 # Create drone simulator launch script
 RUN echo '#!/bin/bash\n\
-source /opt/ros/humble/setup.bash\n\
+source /opt/ros/jazzy/setup.bash\n\
 source /root/drone_ws/install/setup.bash\n\
 \n\
 # Start the drone simulator\n\
@@ -50,12 +50,12 @@ ros2 launch sjtu_drone_bringup sjtu_drone_gazebo.launch.py' > /usr/local/bin/run
 # Persistent environment setup
 RUN echo "export DISPLAY=:0" >> ~/.bashrc
 RUN echo "export TURTLEBOT3_MODEL=burger" >> ~/.bashrc
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 RUN echo "source /root/drone_ws/install/setup.bash" >> ~/.bashrc
 
 # Create script to spawn obstacles in turtlesim
 RUN echo '#!/bin/bash\n\
-source /opt/ros/humble/setup.bash\n\
+source /opt/ros/jazzy/setup.bash\n\
 \n\
 # Spawn multiple obstacles at different positions\n\
 ros2 service call /spawn turtlesim/srv/Spawn "{x: 3.0, y: 3.0, theta: 0.0, name: \"obstacle1\"}"\n\
